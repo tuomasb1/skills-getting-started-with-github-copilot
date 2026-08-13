@@ -40,6 +40,53 @@
         <button id="signupAllBtn" type="button">Screw it let's do them all</button>
         <div id="message" class="hidden"></div>
       </section>
+
+      <section id="minigame-container">
+        <h3>Take a Break!</h3>
+        <button id="playGameBtn" type="button">Play Rock Paper Scissors</button>
+        <button id="playTicTacToeBtn" type="button">Play Tic Tac Toe</button>
+      </section>
+
+      <!-- Rock Paper Scissors Game Modal -->
+      <div id="gameModal" class="modal hidden">
+        <div class="modal-content">
+          <span id="closeGame" class="close">&times;</span>
+          <h2>Rock Paper Scissors</h2>
+          <div id="gameScore" class="score-display">
+            <div class="score-item">You: <span id="playerScore">0</span></div>
+            <div class="score-item">Computer: <span id="computerScore">0</span></div>
+          </div>
+          <div id="gameBoard">
+            <div id="gameResult" class="result hidden"></div>
+            <div id="choices" class="choices-container">
+              <button class="choice-btn" data-choice="rock">🪨 Rock</button>
+              <button class="choice-btn" data-choice="paper">📄 Paper</button>
+              <button class="choice-btn" data-choice="scissors">✂️ Scissors</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tic Tac Toe Game Modal -->
+      <div id="tictactoeModal" class="modal hidden">
+        <div class="modal-content tictactoe-modal">
+          <span id="closeTicTacToe" class="close">&times;</span>
+          <h2>Tic Tac Toe</h2>
+          <div id="tictactoeStatus" class="game-status">Your turn (X)</div>
+          <div id="tictactoeBoard" class="tictactoe-board">
+            <div class="tictactoe-cell" data-index="0"></div>
+            <div class="tictactoe-cell" data-index="1"></div>
+            <div class="tictactoe-cell" data-index="2"></div>
+            <div class="tictactoe-cell" data-index="3"></div>
+            <div class="tictactoe-cell" data-index="4"></div>
+            <div class="tictactoe-cell" data-index="5"></div>
+            <div class="tictactoe-cell" data-index="6"></div>
+            <div class="tictactoe-cell" data-index="7"></div>
+            <div class="tictactoe-cell" data-index="8"></div>
+          </div>
+          <button id="resetTicTacToeBtn" class="tictactoe-reset-btn">New Game</button>
+        </div>
+      </div>
     </main>
 
     <footer>

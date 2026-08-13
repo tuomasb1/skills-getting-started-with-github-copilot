@@ -183,6 +183,194 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Game state
+  let playerScore = 0;
+  let computerScore = 0;
+  const gameModal = document.getElementById("gameModal");
+  const playGameBtn = document.getElementById("playGameBtn");
+  const closeGame = document.getElementById("closeGame");
+  const choiceBtns = document.querySelectorAll(".choice-btn");
+  const gameResultDiv = document.getElementById("gameResult");
+  const playerScoreSpan = document.getElementById("playerScore");
+  const computerScoreSpan = document.getElementById("computerScore");
+
+  // Open game modal
+  playGameBtn.addEventListener("click", () => {
+    gameModal.classList.remove("hidden");
+  });
+
+  // Close game modal
+  closeGame.addEventListener("click", () => {
+    gameModal.classList.add("hidden");
+    // Reset game
+    playerScore = 0;
+    computerScore = 0;
+    playerScoreSpan.textContent = "0";
+    computerScoreSpan.textContent = "0";
+    gameResultDiv.classList.add("hidden");
+  });
+
+  // Close modal when clicking outside
+  window.addEventListener("click", (event) => {
+    if (event.target === gameModal) {
+      gameModal.classList.add("hidden");
+      playerScore = 0;
+      computerScore = 0;
+      playerScoreSpan.textContent = "0";
+      computerScoreSpan.textContent = "0";
+      gameResultDiv.classList.add("hidden");
+    }
+  });
+
+  // Handle game choice
+  choiceBtns.forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const playerChoice = btn.getAttribute("data-choice");
+
+      try {
+        const response = await fetch("/game/rps", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ player_choice: playerChoice }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Game error");
+        }
+
+        const gameData = await response.json();
+
+        // Update scores
+        if (gameData.result === "win") {
+          playerScore++;
+        } else if (gameData.result === "lose") {
+          computerScore++;
+        }
+
+        playerScoreSpan.textContent = playerScore;
+        computerScoreSpan.textContent = computerScore;
+
+        // Display result
+        const choiceEmojis = {
+          rock: "🪨",
+          paper: "📄",
+          scissors: "✂️",
+        };
+
+        gameResultDiv.innerHTML = `
+          <div>
+            <p>You chose: ${choiceEmojis[gameData.player_choice]} ${gameData.player_choice}</p>
+            <p>Computer chose: ${choiceEmojis[gameData.computer_choice]} ${gameData.computer_choice}</p>
+          </div>
+          <p>${gameData.message}</p>
+        `;
+        gameResultDiv.className = `result ${gameData.result}`;
+      } catch (error) {
+        gameResultDiv.textContent = "Error playing game. Try again!";
+        gameResultDiv.className = "result lose";
+        console.error(error);
+      }
+    });
+  });
+
+  // Tic Tac Toe Game
+  const tictactoeModal = document.getElementById("tictactoeModal");
+  const playTicTacToeBtn = document.getElementById("playTicTacToeBtn");
+  const closeTicTacToe = document.getElementById("closeTicTacToe");
+  const tictactoeCells = document.querySelectorAll(".tictactoe-cell");
+  const tictactoeStatus = document.getElementById("tictactoeStatus");
+  const resetTicTacToeBtn = document.getElementById("resetTicTacToeBtn");
+  
+  let tictactoeBoard = ["", "", "", "", "", "", "", "", ""];
+  let gameActive = true;
+
+  // Open Tic Tac Toe modal
+  playTicTacToeBtn.addEventListener("click", () => {
+    tictactoeBoard = ["", "", "", "", "", "", "", "", ""];
+    gameActive = true;
+    updateTicTacToeBoard();
+    tictactoeStatus.textContent = "Your turn (X)";
+    tictactoeStatus.style.color = "#1a237e";
+    tictactoeModal.classList.remove("hidden");
+  });
+
+  // Close Tic Tac Toe modal
+  closeTicTacToe.addEventListener("click", () => {
+    tictactoeModal.classList.add("hidden");
+  });
+
+  // Close modal when clicking outside
+  window.addEventListener("click", (event) => {
+    if (event.target === tictactoeModal) {
+      tictactoeModal.classList.add("hidden");
+    }
+  });
+
+  // Reset game
+  resetTicTacToeBtn.addEventListener("click", () => {
+    tictactoeBoard = ["", "", "", "", "", "", "", "", ""];
+    gameActive = true;
+    updateTicTacToeBoard();
+    tictactoeStatus.textContent = "Your turn (X)";
+    tictactoeStatus.style.color = "#1a237e";
+  });
+
+  function updateTicTacToeBoard() {
+    tictactoeCells.forEach((cell, index) => {
+      cell.textContent = tictactoeBoard[index];
+      cell.classList.toggle("disabled", !gameActive || tictactoeBoard[index] !== "");
+    });
+  }
+
+  // Handle Tic Tac Toe cell click
+  tictactoeCells.forEach((cell) => {
+    cell.addEventListener("click", async () => {
+      if (!gameActive) return;
+      
+      const index = parseInt(cell.getAttribute("data-index"));
+      
+      if (tictactoeBoard[index] !== "") return;
+      
+      try {
+        const response = await fetch("/game/tictactoe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ board: tictactoeBoard, move: index }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Game error");
+        }
+
+        const gameData = await response.json();
+        tictactoeBoard = gameData.board;
+        updateTicTacToeBoard();
+
+        // Update status
+        if (gameData.status === "player_win") {
+          tictactoeStatus.textContent = "You win! 🎉";
+          tictactoeStatus.style.color = "#2e7d32";
+          gameActive = false;
+        } else if (gameData.status === "computer_win") {
+          tictactoeStatus.textContent = "Computer wins!";
+          tictactoeStatus.style.color = "#c62828";
+          gameActive = false;
+        } else if (gameData.status === "draw") {
+          tictactoeStatus.textContent = "It's a draw!";
+          tictactoeStatus.style.color = "#f57f17";
+          gameActive = false;
+        } else {
+          tictactoeStatus.textContent = "Your turn (X)";
+          tictactoeStatus.style.color = "#1a237e";
+        }
+      } catch (error) {
+        tictactoeStatus.textContent = "Game error. Try again!";
+        tictactoeStatus.style.color = "#c62828";
+        console.error(error);
+      }
+    });
+  });
+
   // Initialize app
   fetchActivities();
 });
